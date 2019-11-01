@@ -1,0 +1,8 @@
+prefix=/home/usrl/chefbot_ws/devel
+
+Name: aula
+Description: Description of aula
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/usrl/chefbot_ws/devel/lib 
+Requires: 

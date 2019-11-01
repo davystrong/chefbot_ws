@@ -1,0 +1,8 @@
+prefix=/home/usrl/chefbot_ws/devel
+
+Name: aulastd_msgs
+Description: Description of aulastd_msgs
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/usrl/chefbot_ws/devel/lib 
+Requires: 
