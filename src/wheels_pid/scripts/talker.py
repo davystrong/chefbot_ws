@@ -14,7 +14,7 @@ from sensor_msgs.msg import JointState
 
 wheel_sep = 0.3
 wheel_diameter = 0.09
-set_point = 5.0
+set_point = 30.0
 
 pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size=5)
 
@@ -24,13 +24,9 @@ def getTwist(left_wheel_speed, right_wheel_speed):
     twist.angular.z = (right_wheel_speed - left_wheel_speed) / wheel_sep
     return twist
 
-def calc_control(wheel_speed, kp, ki, kd):
-    kp = 1
-    ki = 0.01
-    kd = 0 # Unused
-
-    error = set_point - wheel_speed
-    calc_control.integrator += error/30 #30 is the update rate
+def calc_control(wheel_rot, kp, ki, kd):
+    error = set_point - wheel_rot
+    calc_control.integrator += error/100 #100 is the update rate
 
     output = error * kp + calc_control.integrator * ki
 
@@ -40,10 +36,9 @@ calc_control.integrator = 0
 def handleJointState(joint_state):
     left_wheel_rot, right_wheel_rot = joint_state.velocity
 
-    desired_left_speed = calc_control(left_wheel_rot * wheel_diameter / 2, 1, 0.01, 0)
-    desired_right_speed = calc_control(right_wheel_rot * wheel_diameter / 2, 1, 0.01, 0)
+    desired_left_speed = calc_control(left_wheel_rot, 0.3, 4, 0) * wheel_diameter / 2
+    desired_right_speed = calc_control(right_wheel_rot, 0.3, 4, 0) * wheel_diameter / 2
     twist = getTwist(desired_left_speed, desired_right_speed)
-    print(twist)
     pub.publish(twist)
 
 
