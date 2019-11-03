@@ -24,7 +24,7 @@ def getTwist(left_wheel_speed, right_wheel_speed):
     twist.angular.z = (right_wheel_speed - left_wheel_speed) / wheel_sep
     return twist
 
-def calc_control(wheel_speed):
+def calc_control(wheel_speed, kp, ki, kd):
     kp = 1
     ki = 0.01
     kd = 0 # Unused
@@ -40,10 +40,8 @@ calc_control.integrator = 0
 def handleJointState(joint_state):
     left_wheel_rot, right_wheel_rot = joint_state.velocity
 
-    print(left_wheel_rot)
-
-    desired_left_speed = calc_control(left_wheel_rot * wheel_diameter / 2)
-    desired_right_speed = calc_control(right_wheel_rot * wheel_diameter / 2)
+    desired_left_speed = calc_control(left_wheel_rot * wheel_diameter / 2, 1, 0.01, 0)
+    desired_right_speed = calc_control(right_wheel_rot * wheel_diameter / 2, 1, 0.01, 0)
     twist = getTwist(desired_left_speed, desired_right_speed)
     print(twist)
     pub.publish(twist)
