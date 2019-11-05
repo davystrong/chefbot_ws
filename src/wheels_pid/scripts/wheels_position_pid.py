@@ -14,12 +14,12 @@ from sensor_msgs.msg import JointState
 
 wheel_sep = 0.3
 wheel_diameter = 0.09
-set_point = 100.0
+
 
 pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size=5)
 
-def position_control(wheel_position, ki, kp):
-    error = set_point - wheel_position
+def position_control(set_point_position ,wheel_position, ki, kp):
+    error = set_point_position - wheel_position
     position_control.integrator += error/100
 
     return error * kp + position_control.integrator * ki
@@ -41,18 +41,64 @@ def calc_control(wheel_rot, velocity_setpoint, kp, ki, kd):
     return output
 calc_control.integrator = 0
 
-def handleJointState(joint_state):
+def forward_movement(position_set_point, joint_state):
     left_wheel_rot, right_wheel_rot = joint_state.velocity
     wheel_position_left, wheel_position_rigth = joint_state.position
 
-    velocity_set_left =  position_control(wheel_position_left, 0.0002, 0.8)
-    velocity_set_rigth =  position_control(wheel_position_rigth, 0.0002, 0.8)
+    if(forward_movement.endPositionLeft == 0 and forward_movement.endPositionRigth == 0 ):
+        forward_movement.endPositionLeft = wheel_position_left + position_set_point
+        forward_movement.endPositionRigth = wheel_position_rigth + position_set_point
+
+    velocity_set_left =  position_control(forward_movement.endPositionLeft, wheel_position_left, 0.0002, 0.8)
+    velocity_set_rigth = position_control(forward_movement.endPositionRigth, wheel_position_rigth, 0.0002, 0.8)
 
     desired_left_speed = calc_control(left_wheel_rot, velocity_set_left, 0.2, 4, 0) * wheel_diameter / 2
     desired_right_speed = calc_control(right_wheel_rot, velocity_set_rigth, 0.2, 4, 0) * wheel_diameter / 2
     twist = getTwist(desired_left_speed, desired_right_speed)
     pub.publish(twist)
+forward_movement.endPositionLeft = 0
+forward_movement.endPositionRigth = 0
 
+def turn_left_movement(angle_set_point, joint_state):
+    left_wheel_rot, right_wheel_rot = joint_state.velocity
+    wheel_position_left, wheel_position_rigth = joint_state.position
+
+    if(turn_left_movement.endPositionLeft == 0 and turn_left_movement.endPositionRigth == 0 ):
+        turn_left_movement.endPositionLeft = wheel_position_left - angle_set_point * (wheel_sep * 4 / (180 * wheel_diameter))
+        turn_left_movement.endPositionRigth = wheel_position_rigth + angle_set_point * (wheel_sep * 4 / (180 * wheel_diameter))
+
+    velocity_set_left =  position_control(turn_left_movement.endPositionLeft,wheel_position_left, 0.001, 1)
+    velocity_set_rigth =  position_control(turn_left_movement.endPositionRigth,wheel_position_rigth, 0.001, 1)
+
+    desired_left_speed = calc_control(left_wheel_rot, velocity_set_left, 0.2, 4, 0) * wheel_diameter / 2
+    desired_right_speed = calc_control(right_wheel_rot, velocity_set_rigth, 0.2, 4, 0) * wheel_diameter / 2
+    twist = getTwist(desired_left_speed, desired_right_speed)
+    pub.publish(twist)
+turn_left_movement.endPositionLeft = 0
+turn_left_movement.endPositionRigth = 0
+
+
+def turn_rigth_movement(angle_set_point, joint_state):
+    left_wheel_rot, right_wheel_rot = joint_state.velocity
+    wheel_position_left, wheel_position_rigth = joint_state.position
+
+    if(turn_rigth_movement.endPositionLeft == 0 and turn_rigth_movement.endPositionRigth == 0 ):
+        turn_rigth_movement.endPositionLeft = wheel_position_left + angle_set_point * (wheel_sep * 4 / (180 * wheel_diameter))
+        turn_rigth_movement.endPositionRigth = wheel_position_rigth - angle_set_point * (wheel_sep * 4 / (180 * wheel_diameter))
+
+    velocity_set_left =  position_control(turn_rigth_movement.endPositionLeft,wheel_position_left, 0.001, 1)
+    velocity_set_rigth =  position_control(turn_rigth_movement.endPositionRigth,wheel_position_rigth, 0.001, 1)
+
+    desired_left_speed = calc_control(left_wheel_rot, velocity_set_left, 0.2, 4, 0) * wheel_diameter / 2
+    desired_right_speed = calc_control(right_wheel_rot, velocity_set_rigth, 0.2, 4, 0) * wheel_diameter / 2
+    twist = getTwist(desired_left_speed, desired_right_speed)
+    pub.publish(twist)
+turn_rigth_movement.endPositionLeft = 0
+turn_rigth_movement.endPositionRigth = 0
+
+
+def handleJointState(joint_state):
+    turn_rigth_movement(90 , joint_state)
 
 def talker():
 
