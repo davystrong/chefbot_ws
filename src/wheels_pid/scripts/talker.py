@@ -2,7 +2,7 @@
 
 #test
 import rospy
-from std_msgs.msg import String, Float32
+from std_msgs.msg import String, Float32, Int32
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import JointState
 
@@ -45,15 +45,24 @@ def handleJointState(joint_state):
 def talker():
     
     rospy.init_node('talker', anonymous=True)
-    sub = rospy.Subscriber('/joint_states', JointState, handleJointState)
-    # rate = rospy.Rate(30) # 30hz
+    # sub = rospy.Subscriber('/joint_states', JointState, handleJointState)
+    pub = rospy.Publisher('/rotate_angle', Float32, queue_size=5)
+    # pub.publish(90.0)
+    rate = rospy.Rate(30) # 30hz
     while not rospy.is_shutdown():
-        pass
+        # pass
         # twist = Twist()
         # twist.linear.x = 5; twist.linear.y = 0; twist.linear.z = 0
         # twist.angular.x = 0; twist.angular.y = 0; twist.angular.z = 0
         # pub.publish(twist)
+        # pub.publish(90.0)
         # rate.sleep()
+        angstr = input('Angle: ')
+        print(angstr)
+        print(type(angstr))
+        angle = float(angstr)
+        print(angle)
+        pub.publish(angle)
 
 if __name__ == '__main__':
     try:
