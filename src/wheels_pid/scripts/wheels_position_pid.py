@@ -89,8 +89,8 @@ def turn_right_movement(angle_set_point, joint_state):
     velocity_set_left =  position_control(turn_right_movement.endPositionLeft,wheel_position_left, 0.001, 1)
     velocity_set_right =  position_control(turn_right_movement.endPositionRight,wheel_position_right, 0.001, 1)
 
-    desired_left_speed = calc_control(left_wheel_rot, velocity_set_left, 0.2, 4, 0) * wheel_diameter / 2
-    desired_right_speed = calc_control(right_wheel_rot, velocity_set_right, 0.2, 4, 0) * wheel_diameter / 2
+    desired_left_speed = calc_control(left_wheel_rot, velocity_set_left, 10, 4, 0) * wheel_diameter / 2
+    desired_right_speed = calc_control(right_wheel_rot, velocity_set_right, 10, 4, 0) * wheel_diameter / 2
     twist = getTwist(desired_left_speed, desired_right_speed)
     pub.publish(twist)
 turn_right_movement.endPositionLeft = 0
