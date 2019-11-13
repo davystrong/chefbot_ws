@@ -12,12 +12,27 @@ from cv_bridge import CvBridge
 #255(branco) = sabemos que está livre (0)
 #100(cinza) = não sabemos (-1)
 img = np.ones((200,200), np.float32) * 100
+map_matrix = np.ones((200,200), np.float32) * (-1)
 hasImage = False
 LaserScanGlobal = {}
 angle_runned = 0
 
 pub = rospy.Publisher('/traj_output_teste', Image, queue_size=10)
 pub2 = rospy.Publisher('/vision_now_matrix', Image, queue_size=10)
+
+def TranslateImageToMap(image)
+    mp = image
+    mp[mp==0] = 1
+    mp[mp==255] = 0
+    mp[mp>1] = -1
+    return mp
+
+def TranslateMapToImage(mp)
+    image = mp
+    image[image==1] = 0
+    image[image==0] = 255
+    image[image==-1] = 100
+    return image
 
 def Publish_Image():
     global img
@@ -87,6 +102,7 @@ def kinectCallback(LaserScanLocal):
     x_pix = int(x_dist_rotated * 10 + x_a)
     y_pix = int(y_dist_rotated * 10 + y_a)
     cv2.line(img_now,(x_a,y_a),(x_pix , y_pix), 180, 1)
+    map_matrix = TranslateImageToMap(img)
     Publish_Image_Now(img_now)
 
 
