@@ -66,6 +66,22 @@ def kinectCallback(LaserScanLocal):
             cv2.line(img,(x_pix , y_pix),(x_pix , y_pix),0,1)
             cv2.line(img_now,(x_pix , y_pix),(x_pix , y_pix),0,1)
             #pinta o píxel encontrado de preto indicando que o mesmo está ocupado
+        else:
+            #neste caso não foi encontrado um obejto
+            #calcula a distancia, nos eixos x e y, entre o centro de massa do robo e o alcance máximo do sensor
+            y_dist = LaserScanLocal.range_max * np.sin(angle)
+            x_dist = LaserScanLocal.range_max * np.cos(angle)
+			
+            #rotaciona a distancia a partir da posição atual do robo
+            x_dist_rotated = x_dist * rotationMatrix[0][0] + y_dist * rotationMatrix[0][1]
+            y_dist_rotated = x_dist * rotationMatrix[1][0] + y_dist * rotationMatrix[1][1]
+            #transforma a distancia calculada em pixels
+            x_pix = int(x_dist_rotated * 10 + x_a)
+            y_pix = int(y_dist_rotated * 10 + y_a)
+            #traça uma linha branca indicando que tudo até o objeto encontrado não está ocupado
+            cv2.line(img,(x_a,y_a),(x_pix , y_pix),255,1)
+            cv2.line(img_now,(x_a,y_a),(x_pix , y_pix),255,1)
+            
     x_dist_rotated = 5 * rotationMatrix[0][0]
     y_dist_rotated = 5 * rotationMatrix[1][0]
     x_pix = int(x_dist_rotated * 10 + x_a)
