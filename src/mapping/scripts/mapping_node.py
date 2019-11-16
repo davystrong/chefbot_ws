@@ -14,30 +14,15 @@ from nav_msgs.msg import Odometry
 #255(branco) = sabemos que está livre (0)
 #100(cinza) = não sabemos (-1)
 img = np.ones((200,200), np.float32) * 100
-map_matrix = np.ones((200,200), np.float32) * (-1)
+img_now = np.ones((200,200), np.float32) * 100
 hasImage = False
 LaserScanGlobal = {}
 angle_Yaw = 0
 x_a_moved = 0
 y_a_moved = 0
 
-
 pub = rospy.Publisher('/traj_output_teste', Image, queue_size=10)
 pub2 = rospy.Publisher('/vision_now_matrix', Image, queue_size=10)
-
-def TranslateImageToMap(img):
-    mp = img
-    mp[mp==0] = 1
-    mp[mp==255] = 0
-    mp[mp>1] = -1
-    return mp
-
-def TranslateMapToImage(mp):
-    image = mp
-    image[image==1] = 0
-    image[image==0] = 255
-    image[image==-1] = 100
-    return image
 
 def Publish_Image():
     global img
@@ -57,9 +42,16 @@ def movementCallback(Odometer):
     global x_a_moved
     global y_a_moved
     global angle_Yaw
-    x_a_moved = Odometer.pose.pose.position.x
-    y_a_moved = Odometer.pose.pose.position.y
-    (roll,pitch,yaw) = euler_from_quaternion(Odometer.pose.pose.orientation)
+    x_a_moved = int(Odometer.pose.pose.position.x)
+    y_a_moved = int(Odometer.pose.pose.position.y)
+    #print (Odometer.pose.pose.orientation)
+    quaternion = (
+        Odometer.pose.pose.orientation.x,
+        Odometer.pose.pose.orientation.y,
+        Odometer.pose.pose.orientation.z,
+        Odometer.pose.pose.orientation.w)
+    (roll,pitch,yaw) = euler_from_quaternion(quaternion)
+    #print((roll,pitch,yaw))
     angle_Yaw = yaw
 
 def kinectCallback(LaserScanLocal):
@@ -71,11 +63,15 @@ def kinectCallback(LaserScanLocal):
     global y_a_moved
     x_a = 100 + x_a_moved
     y_a = 100 + y_a_moved
+    radius = 2
     LaserScanGlobal = LaserScanLocal
     hasImage = True
     img_now = np.ones((200,200), np.float32) * 100
+    #marca como livre a área que o robo ocupa
+    img_now = cv2.circle(img_now, (x_a, y_a), radius, 255, -1)
+    img     = cv2.circle(img, (x_a, y_a), radius, 255, -1)
     rotationMatrix = CalculateNewRotationMatrix(angle_Yaw)
-    print(angle_Yaw)
+    #print(angle_Yaw)
     angle = LaserScanLocal.angle_min
     for i in LaserScanLocal.ranges:
         angle = LaserScanLocal.angle_increment + angle
@@ -84,7 +80,7 @@ def kinectCallback(LaserScanLocal):
             #calcula a distancia, nos eixos x e y, entre o objeto encontrado e o centro de massa do robo
             y_dist = i * np.sin(angle)
             x_dist = i * np.cos(angle)
-           # print(angle)
+            #print(angle)
             #rotaciona a distancia a partir da posição atual do robo
             x_dist_rotated = x_dist * rotationMatrix[0][0] + y_dist * rotationMatrix[0][1]
             y_dist_rotated = x_dist * rotationMatrix[1][0] + y_dist * rotationMatrix[1][1]
@@ -97,7 +93,8 @@ def kinectCallback(LaserScanLocal):
 
             cv2.line(img,(x_pix , y_pix),(x_pix , y_pix),0,1)
             cv2.line(img_now,(x_pix , y_pix),(x_pix , y_pix),0,1)
-            #pinta o píxel encontrado de preto indicando que o mesmo está ocupado       
+            #pinta o píxel encontrado de preto indicando que o mesmo está ocupado
+
     x_dist_rotated = 5 * rotationMatrix[0][0]
     y_dist_rotated = 5 * rotationMatrix[1][0]
     x_pix = int(x_dist_rotated * 10 + x_a)
@@ -115,7 +112,7 @@ def map():
 if __name__ == '__main__':
     rospy.init_node('mapping_node', anonymous=True)
     rospy.Subscriber('/scan', LaserScan, kinectCallback)
-    rospy.Subscriber('/odom', LaserScan, kinectCallback)
+    rospy.Subscriber('/odom', Odometry, movementCallback)
     map()
 
     pass
