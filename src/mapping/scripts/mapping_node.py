@@ -20,7 +20,7 @@ LaserScanGlobal = {}
 angle_Yaw = 0
 x_a_moved = 0
 y_a_moved = 0
-resolution = 4
+resolution = 5
 
 pub = rospy.Publisher('/traj_output_teste', Image, queue_size=10)
 pub2 = rospy.Publisher('/vision_now_matrix', Image, queue_size=10)
@@ -67,7 +67,7 @@ def kinectCallback(LaserScanLocal):
     global img
     global img_now
     x_a = 100  + int(x_a_moved * resolution)
-    y_a = 100 + int(y_a_moved * resolution)
+    y_a = 100 - int(y_a_moved * resolution)
     radius = int(0.2 * resolution)
     LaserScanGlobal = LaserScanLocal
     hasImage = True
@@ -77,7 +77,7 @@ def kinectCallback(LaserScanLocal):
     cv2.circle(img, (x_a, y_a), radius, 255, -1)
     rotationMatrix = CalculateNewRotationMatrix(angle_Yaw)
     #print(angle_Yaw)
-    angle = LaserScanLocal.angle_min
+    angle = LaserScanLocal.angle_max
     for i in LaserScanLocal.ranges:
         if not math.isnan(i):
             #neste caso foi encontrado um obejto
@@ -98,7 +98,7 @@ def kinectCallback(LaserScanLocal):
             cv2.line(img,(x_pix , y_pix),(x_pix , y_pix),0,1)
             cv2.line(img_now,(x_pix , y_pix),(x_pix , y_pix),0,1)
             #pinta o píxel encontrado de preto indicando que o mesmo está ocupado
-        angle = LaserScanLocal.angle_increment + angle
+        angle = -LaserScanLocal.angle_increment + angle
     x_dist_rotated = 5 * rotationMatrix[0][0]
     y_dist_rotated = 5 * rotationMatrix[1][0]
     x_pix = int(x_dist_rotated * resolution + x_a)
