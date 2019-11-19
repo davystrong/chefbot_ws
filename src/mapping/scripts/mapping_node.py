@@ -9,18 +9,20 @@ from tf.transformations import euler_from_quaternion
 from sensor_msgs.msg import LaserScan, Image
 from cv_bridge import CvBridge
 from nav_msgs.msg import Odometry
+from threading import Lock
 
 #0(preto) = sabemos que está ocupado (1)
 #255(branco) = sabemos que está livre (0)
 #100(cinza) = não sabemos (-1)
 img = np.ones((200,200), np.float32) * 100
 img_now = np.ones((200,200), np.float32) * 100
-hasImage = False
 LaserScanGlobal = {}
 angle_Yaw = 0
 x_a_moved = 0
 y_a_moved = 0
 resolution = 5
+mutex = Lock()
+
 
 pub = rospy.Publisher('/traj_output_teste', Image, queue_size=10)
 pub2 = rospy.Publisher('/vision_now_matrix', Image, queue_size=10)
@@ -28,7 +30,9 @@ pub2 = rospy.Publisher('/vision_now_matrix', Image, queue_size=10)
 def Publish_Image():
     global img
     br = CvBridge()
+    mutex.acquire()
     msg = br.cv2_to_imgmsg(img)
+    mutex.release()
     pub.publish(msg)
 
 def Publish_Image_Now(img_now):
@@ -44,21 +48,20 @@ def movementCallback(Odometer):
     global y_a_moved
     global angle_Yaw
     global img
-    x_a_moved = Odometer.pose.pose.position.x
-    y_a_moved = Odometer.pose.pose.position.y
-    #print (Odometer.pose.pose.orientation)
     quaternion = (
         Odometer.pose.pose.orientation.x,
         Odometer.pose.pose.orientation.y,
         Odometer.pose.pose.orientation.z,
         Odometer.pose.pose.orientation.w)
     (roll,pitch,yaw) = euler_from_quaternion(quaternion)
-    #print((roll,pitch,yaw))
+    mutex.acquire()
     angle_Yaw = yaw
+    x_a_moved = Odometer.pose.pose.position.x
+    y_a_moved = Odometer.pose.pose.position.y
+    mutex.release()
 
 def kinectCallback(LaserScanLocal):
     global LaserScanGlobal
-    global hasImage
     global angle_Yaw
     global resolution
     angle = 0
@@ -66,18 +69,22 @@ def kinectCallback(LaserScanLocal):
     global y_a_moved
     global img
     global img_now
+
+    mutex.acquire()
     x_a = 100  + int(x_a_moved * resolution)
     y_a = 100 - int(y_a_moved * resolution)
-    radius = int(0.2 * resolution)
     LaserScanGlobal = LaserScanLocal
-    hasImage = True
+    mutex.release()
+
+    radius = int(0.2 * resolution)
     img_now = np.ones((200,200), np.float32) * 100
     #marca como livre a área que o robo ocupa
     cv2.circle(img_now, (x_a, y_a), radius, 255, -1)
     cv2.circle(img, (x_a, y_a), radius, 255, -1)
     rotationMatrix = CalculateNewRotationMatrix(angle_Yaw)
-    #print(angle_Yaw)
+
     angle = LaserScanLocal.angle_max
+
     for i in LaserScanLocal.ranges:
         if not math.isnan(i):
             #neste caso foi encontrado um obejto
