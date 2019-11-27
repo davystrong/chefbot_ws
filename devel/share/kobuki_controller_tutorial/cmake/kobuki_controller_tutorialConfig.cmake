@@ -67,14 +67,14 @@ set(kobuki_controller_tutorial_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("TRUE" STREQUAL "TRUE")
-  set(kobuki_controller_tutorial_SOURCE_PREFIX /home/usrl/chefbot_ws/src/kobuki_controller_tutorial)
-  set(kobuki_controller_tutorial_DEVEL_PREFIX /home/usrl/chefbot_ws/devel)
+  set(kobuki_controller_tutorial_SOURCE_PREFIX /home/david/chefbot_ws/src/kobuki_controller_tutorial)
+  set(kobuki_controller_tutorial_DEVEL_PREFIX /home/david/chefbot_ws/devel)
   set(kobuki_controller_tutorial_INSTALL_PREFIX "")
   set(kobuki_controller_tutorial_PREFIX ${kobuki_controller_tutorial_DEVEL_PREFIX})
 else()
   set(kobuki_controller_tutorial_SOURCE_PREFIX "")
   set(kobuki_controller_tutorial_DEVEL_PREFIX "")
-  set(kobuki_controller_tutorial_INSTALL_PREFIX /home/usrl/chefbot_ws/install)
+  set(kobuki_controller_tutorial_INSTALL_PREFIX /home/david/chefbot_ws/install)
   set(kobuki_controller_tutorial_PREFIX ${kobuki_controller_tutorial_INSTALL_PREFIX})
 endif()
 
@@ -91,9 +91,9 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(kobuki_controller_tutorial_FOUND_CATKIN_PROJECT TRUE)
 
-if(NOT "/home/usrl/chefbot_ws/src/kobuki_controller_tutorial/include " STREQUAL " ")
+if(NOT "/home/david/chefbot_ws/src/kobuki_controller_tutorial/include " STREQUAL " ")
   set(kobuki_controller_tutorial_INCLUDE_DIRS "")
-  set(_include_dirs "/home/usrl/chefbot_ws/src/kobuki_controller_tutorial/include")
+  set(_include_dirs "/home/david/chefbot_ws/src/kobuki_controller_tutorial/include")
   if(NOT "https://github.com/yujinrobot/kobuki/issues " STREQUAL " ")
     set(_report "Check the issue tracker 'https://github.com/yujinrobot/kobuki/issues' and consider creating a ticket if the problem has not been reported yet.")
   elseif(NOT "http://ros.org/wiki/kobuki_controller_tutorial " STREQUAL " ")
@@ -110,7 +110,7 @@ if(NOT "/home/usrl/chefbot_ws/src/kobuki_controller_tutorial/include " STREQUAL 
         message(FATAL_ERROR "Project 'kobuki_controller_tutorial' specifies '${idir}' as an include dir, which is not found.  It does not exist in '${include}'.  ${_report}")
       endif()
     else()
-      message(FATAL_ERROR "Project 'kobuki_controller_tutorial' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/usrl/chefbot_ws/src/kobuki_controller_tutorial/${idir}'.  ${_report}")
+      message(FATAL_ERROR "Project 'kobuki_controller_tutorial' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/david/chefbot_ws/src/kobuki_controller_tutorial/${idir}'.  ${_report}")
     endif()
     _list_append_unique(kobuki_controller_tutorial_INCLUDE_DIRS ${include})
   endforeach()
@@ -123,6 +123,29 @@ foreach(library ${libraries})
     list(APPEND kobuki_controller_tutorial_LIBRARIES ${library})
   elseif(${library} MATCHES "^-l")
     list(APPEND kobuki_controller_tutorial_LIBRARIES ${library})
+  elseif(${library} MATCHES "^-")
+    # This is a linker flag/option (like -pthread)
+    # There's no standard variable for these, so create an interface library to hold it
+    if(NOT kobuki_controller_tutorial_NUM_DUMMY_TARGETS)
+      set(kobuki_controller_tutorial_NUM_DUMMY_TARGETS 0)
+    endif()
+    # Make sure the target name is unique
+    set(interface_target_name "catkin::kobuki_controller_tutorial::wrapped-linker-option${kobuki_controller_tutorial_NUM_DUMMY_TARGETS}")
+    while(TARGET "${interface_target_name}")
+      math(EXPR kobuki_controller_tutorial_NUM_DUMMY_TARGETS "${kobuki_controller_tutorial_NUM_DUMMY_TARGETS}+1")
+      set(interface_target_name "catkin::kobuki_controller_tutorial::wrapped-linker-option${kobuki_controller_tutorial_NUM_DUMMY_TARGETS}")
+    endwhile()
+    add_library("${interface_target_name}" INTERFACE IMPORTED)
+    if("${CMAKE_VERSION}" VERSION_LESS "3.13.0")
+      set_property(
+        TARGET
+        "${interface_target_name}"
+        APPEND PROPERTY
+        INTERFACE_LINK_LIBRARIES "${library}")
+    else()
+      target_link_options("${interface_target_name}" INTERFACE "${library}")
+    endif()
+    list(APPEND kobuki_controller_tutorial_LIBRARIES "${interface_target_name}")
   elseif(TARGET ${library})
     list(APPEND kobuki_controller_tutorial_LIBRARIES ${library})
   elseif(IS_ABSOLUTE ${library})
@@ -131,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/usrl/chefbot_ws/devel/lib;/home/usrl/chefbot_ws/devel/lib;/opt/ros/melodic/lib)
+    foreach(path /home/david/chefbot_ws/devel/lib;/home/david/chefbot_ws/devel/lib;/home/usrl/chefbot_ws/devel/lib;/opt/ros/melodic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

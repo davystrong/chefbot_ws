@@ -1,8 +1,8 @@
-prefix=/home/usrl/chefbot_ws/devel
+prefix=/home/david/chefbot_ws/devel
 
 Name: turtlebot_capabilities
 Description: Description of turtlebot_capabilities
 Version: 2.4.2
 Cflags: 
-Libs: -L/home/usrl/chefbot_ws/devel/lib 
+Libs: -L/home/david/chefbot_ws/devel/lib 
 Requires: 
