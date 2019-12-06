@@ -1,5 +1,8 @@
 <launch>
-<node name="controller_spawner" pkg="controller_manager"
-type="spawner" respawn="false" output="screen"
-args="shoulder_controller elbow_controller joint_states_publisher" />
+<arg name="controller" default="pid"/>
+<arg name="config" default="$(find controllers)/config/$(arg controller).yaml"/>
+<include file="$(find chefbot_gazebo)/launch/chefbot_hotel_world.launch">
+</include>
+<rosparam file="$(arg config)" command="load"/>
+<include file="$(find controllers)/launch/$(arg controller).launch"/>
 </launch>

@@ -171,7 +171,7 @@
 
 	    <gazebo>
 			<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-				<!-- <robotNamespace>/q2d</robotNamespace> -->
+				<robotNamespace>/mobile_base</robotNamespace>
 				<controlPeriod>0.001</controlPeriod>
 			</plugin>
 		</gazebo>
