@@ -1,8 +1,8 @@
-prefix=/home/david/chefbot_ws/devel
+prefix=/home/usrl/chefbot_ws/devel
 
 Name: chefbot_bringup
 Description: Description of chefbot_bringup
 Version: 0.0.0
 Cflags: 
-Libs: -L/home/david/chefbot_ws/devel/lib 
+Libs: -L/home/usrl/chefbot_ws/devel/lib 
 Requires: 

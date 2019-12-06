@@ -1,8 +1,8 @@
-prefix=/home/david/chefbot_ws/devel
+prefix=/home/usrl/chefbot_ws/devel
 
 Name: kobuki_random_walker
 Description: Description of kobuki_random_walker
 Version: 0.7.6
-Cflags: -I/home/david/chefbot_ws/src/kobuki_random_walker/include
-Libs: -L/home/david/chefbot_ws/devel/lib -lkobuki_random_walker_nodelet
+Cflags: -I/home/usrl/chefbot_ws/src/kobuki_random_walker/include
+Libs: -L/home/usrl/chefbot_ws/devel/lib -lkobuki_random_walker_nodelet
 Requires: ecl_threads geometry_msgs kobuki_msgs nodelet pluginlib roscpp std_msgs yocs_controllers
