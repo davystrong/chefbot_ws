@@ -67,7 +67,7 @@
 
 
     <joint name="wheel_left_joint" type="continuous">
-    <hardwareInterface>EffortJointInterface</hardwareInterface>
+    <!-- <hardwareInterface>EffortJointInterface</hardwareInterface> -->
       <parent link="base_link"/>
       <child link="chefbot_wheel_left_link"/>
       <origin xyz="0 ${0.28/2} 0.026" rpy="${-M_PI/2} 0 0"/>
@@ -96,7 +96,7 @@
     </link>
     
     <joint name="wheel_right_joint" type="continuous">
-    <hardwareInterface>EffortJointInterface</hardwareInterface>
+    <!-- <hardwareInterface>EffortJointInterface</hardwareInterface> -->
       <parent link="base_link"/>
       <child link="chefbot_wheel_right_link"/>
       <origin xyz="0.00 -${0.28/2} 0.026" rpy="${-M_PI/2} 0 0"/>
