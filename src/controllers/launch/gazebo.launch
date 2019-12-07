@@ -2,7 +2,8 @@
 <arg name="controller" default="pid"/>
 <arg name="config" default="$(find controllers)/config/$(arg controller).yaml"/>
 <include file="$(find chefbot_gazebo)/launch/chefbot_hotel_world.launch">
+<!-- <arg name="verbose" value=true /> -->
 </include>
-<rosparam file="$(arg config)" command="load"/>
+<rosparam file="$(arg config)" command="load" ns="mobile_base"/>
 <include file="$(find controllers)/launch/$(arg controller).launch"/>
 </launch>

@@ -1,5 +1,7 @@
 <launch>
 <node name="controller_spawner" pkg="controller_manager"
 type="spawner" respawn="false" output="screen"
-args="wheel_right_controller wheel_left_controller joint_states_publisher" />
+args="wheel_right_controller wheel_left_controller joint_states_publisher"
+ns="mobile_base"
+/>
 </launch>
