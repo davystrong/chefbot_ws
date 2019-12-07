@@ -26,9 +26,9 @@ def mapping_callback(fullmap):
     D = 0
     X = 0
     Y = 0
-    for i in range(0, where[0].size):
-        x = where[0][i] - fullmap.shape[0]/2.0
-        y = where[1][i] - fullmap.shape[1]/2.0
+    for i in range(0, wh[0].size):
+        x = wh[0][i] - fullmap.shape[0]/2.0
+        y = wh[1][i] - fullmap.shape[1]/2.0
         d = np.sqrt(x**2+y**2)
         if d>D:
             X = x
