@@ -6,7 +6,26 @@ import numpy as np
 import math
 import rospy
 
+pubAng = rospy.Publisher('/wheels_angulo', Float32, queue_size=10)
+pubVel = rospy.Publisher('/wheels_velocidade', Float32, queue_size=10)
 
+def movementCallback(Odometer):
+    global x_a_moved
+    global y_a_moved
+    global angle_Yaw
+    global img
+    quaternion = (
+        Odometer.pose.pose.orientation.x,
+        Odometer.pose.pose.orientation.y,
+        Odometer.pose.pose.orientation.z,
+        Odometer.pose.pose.orientation.w)
+    (roll,pitch,yaw) = euler_from_quaternion(quaternion)
+    mutex.acquire()
+    angle_Yaw = yaw
+    x_a_moved = Odometer.pose.pose.position.x
+    y_a_moved = Odometer.pose.pose.position.y
+    mutex.release()
+    
 def Gauss_Seidel(mapMatrix):
     grad = np.zeros(mapMatrix.shape)
     x = mapMatrix.shape[0]
@@ -39,11 +58,13 @@ def mapping_callback(fullmap):
 
     theta = math.atan2(Y,X)
     
-    #mover na direção de theta com velocidade proporcional a D
+    pubAng.publish(theta-angle_Yaw)
+    pubVel.publish(D*0.1)
 
 if __name__ == '__main__':
     rospy.init_node('exploration_node', anonymous=True)
     rospy.Subscriber('/traj_output_teste', Image, mapping_callback)
+    rospy.Subscriber('/odom', Odometry, movementCallback)
     rospy.spin()
 
     pass
