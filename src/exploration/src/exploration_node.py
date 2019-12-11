@@ -13,20 +13,22 @@ def Gauss_Seidel(mapMatrix):
     y = mapMatrix.shape[1]
     for i in range(1, x-1):
         for j in range(1, y-1):
-            grad[i,j] = (mapMatrix[i-1,j]+mapMatrix[i+1,j]+mapMatrix[i,j-1]+mapMatrix[i,j+1])/4.0
+            grad[i,j] = (-grad[i-1,j]+mapMatrix[i+1,j]-grad[i,j-1]+mapMatrix[i,j+1])/4.0
+    grad = grad[1:x-1, 1:y-1]
     return grad
 
 def mapping_callback(fullmap):
     grad = Gauss_Seidel(fullmap)
     grad = grad - grad.min()
     grad = grad/grad.max()
+    grad[grad>0.99] = 1
     
     wh = np.where(grad == grad.max())
     
     D = 0
     X = 0
     Y = 0
-    for i in range(0, wh[0].size):
+    for i in range(0, wh[:][0].size):
         x = wh[0][i] - fullmap.shape[0]/2.0
         y = wh[1][i] - fullmap.shape[1]/2.0
         d = np.sqrt(x**2+y**2)
